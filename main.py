@@ -2,14 +2,12 @@ import json
 import webbrowser
 import matplotlib.pyplot as plt
 
-
 def carregar_dados(arquivo='dados.json'):
     try:
         with open(arquivo, 'r') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
-
 
 def obter_tarifa(consumo_mensal):
     if consumo_mensal <= 30:
@@ -25,7 +23,6 @@ def obter_tarifa(consumo_mensal):
     else:
         return 45.31
 
-
 def salvar_dados_automaticamente(dados, arquivo='dados.json'):
     try:
         with open(arquivo, 'w') as f:
@@ -33,15 +30,42 @@ def salvar_dados_automaticamente(dados, arquivo='dados.json'):
     except Exception as e:
         print("Erro ao salvar dados:", e)
 
+def gerar_grafico(dados):
+    custo_instalacao = dados.get("custo_instalacao", 0)
+    economia_mensal = dados.get("economia_mensal", 0)
+    consumo_mensal = dados.get("consumo_mensal", 0)
+    anos = 10
+    
+    custo_comum = []
+    custo_solar = []
+    
+    acumulado_comum = 0
+    acumulado_solar = custo_instalacao
+    
+    for ano in range(anos):
+        acumulado_comum += consumo_mensal * 12
+        acumulado_solar = max(0, acumulado_solar - economia_mensal * 12)  
+        
+        custo_comum.append(acumulado_comum)
+        custo_solar.append(acumulado_solar)
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(anos), custo_comum, label="Custo sem energia solar", color="red", linestyle="--")
+    plt.plot(range(anos), custo_solar, label="Custo com energia solar", color="green")
+    
+    plt.title("Comparação de Custos com e sem Energia Solar ao Longo dos Anos")
+    plt.xlabel("Anos")
+    plt.ylabel("Custo Acumulado (R$)")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    
+    plt.show()
 
 def calcular_custo_instalacao(dados):
-    print("\nPara calcular o custo de instalação, insira o consumo médio mensal de energia em kWh.")
-    print("Esse valor geralmente está indicado na conta de luz como 'Consumo Total' ou 'Consumo em kWh'.\n")
-
     try:
         consumo_mensal = float(input("Insira o consumo médio mensal (em kWh): "))
-        capacidade_necessaria_kw = (consumo_mensal / 150)
-        capacidade_necessaria_kw = round(capacidade_necessaria_kw + 0.5)
+        capacidade_necessaria_kw = round((consumo_mensal / 150) + 0.5)
         custo_por_kw = 5000
         custo_total = capacidade_necessaria_kw * custo_por_kw
 
@@ -51,45 +75,28 @@ def calcular_custo_instalacao(dados):
         dados['consumo_mensal'] = consumo_mensal
 
         salvar_dados_automaticamente(dados)
-
         return custo_total
     except ValueError:
         print("Valor inválido. Por favor, insira um número válido.")
         return None
 
-
 def calcular_economia_mensal(dados):
-    print("\nPara calcular a economia mensal, você precisará do consumo médio mensal e da tarifa de energia.")
-    print("Consumo Médio Mensal: Veja na sua conta de luz a seção 'Consumo Total' ou 'Consumo em kWh'.")
-    print("Tarifa de Energia: Normalmente está indicada como 'Tarifa de Energia' e é o custo por kWh.\n")
-
     try:
         media_consumo = float(input("Insira o consumo médio mensal (em kWh): "))
         tarifa = float(input("Insira a tarifa de energia de sua região (EX: R$1 por kwh) "))
         economia_total = media_consumo * tarifa
-        taxa = obter_tarifa(media_consumo)
-        economia = economia_total - taxa
 
-        print(f"\nEconomia Mensal Bruta Estimada: R${economia_total:.2f}")
-        print(f"Taxa Base Subtraída: R${taxa:.2f}")
-        print(f"Economia Final Mensal Estimada: R${economia:.2f}")
-
-        dados['economia_mensal'] = economia
-
+        dados['economia_mensal'] = economia_total
         salvar_dados_automaticamente(dados)
 
-        return economia
+        return economia_total
     except ValueError:
         print("Valor inválido. Por favor, insira números válidos.")
         return None
 
-
 def calcular_tempo_retorno(dados):
-    print("\nPara calcular o tempo de retorno, precisamos do custo total de instalação e da economia mensal.")
-    print("Isso nos ajuda a saber em quantos meses o investimento será recuperado com a economia na conta de luz.\n")
-
     try:
-        if 'custo_instalacao' in dados and 'economia_mensal' in dados:
+        if 'custo_instalacao' in dados and 'economia_mensal' in dados and dados['economia_mensal'] > 0:
             retorno_meses = dados['custo_instalacao'] / dados['economia_mensal']
             anos = int(retorno_meses // 12)
             meses = int(retorno_meses % 12)
@@ -102,7 +109,6 @@ def calcular_tempo_retorno(dados):
     except ZeroDivisionError:
         print("Erro: economia mensal é zero.")
         return None
-
 
 def menu():
     dados = carregar_dados()
@@ -132,7 +138,7 @@ def menu():
             calcular_tempo_retorno(dados)
 
         elif escolha == "4":
-            print()
+            gerar_grafico(dados)
 
         elif escolha == "5":
             print("Abrindo link para contato no Instagram...")
@@ -144,6 +150,5 @@ def menu():
 
         else:
             print("Opção inválida. Tente novamente.")
-
 
 menu()
