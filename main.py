@@ -3,6 +3,9 @@ import webbrowser
 import matplotlib.pyplot as plt
 
 def carregar_dados(arquivo='dados.json'):
+    """
+    Carrega dados de um arquivo JSON.
+    """
     try:
         with open(arquivo, 'r') as f:
             return json.load(f)
@@ -10,6 +13,9 @@ def carregar_dados(arquivo='dados.json'):
         return {}
 
 def obter_tarifa(consumo_mensal):
+    """
+    Retorna a tarifa com base no consumo mensal em kWh.
+    """
     if consumo_mensal <= 30:
         return 1.62
     elif consumo_mensal <= 50:
@@ -24,6 +30,9 @@ def obter_tarifa(consumo_mensal):
         return 45.31
 
 def salvar_dados_automaticamente(dados, arquivo='dados.json'):
+    """
+    Salva os dados no arquivo JSON.
+    """
     try:
         with open(arquivo, 'w') as f:
             json.dump(dados, f, indent=4)
@@ -31,6 +40,9 @@ def salvar_dados_automaticamente(dados, arquivo='dados.json'):
         print("Erro ao salvar dados:", e)
 
 def gerar_grafico(dados):
+    """
+    Gera um gráfico comparativo entre custos com e sem energia solar.
+    """
     custo_instalacao = dados.get("custo_instalacao", 0)
     economia_mensal = dados.get("economia_mensal", 0)
     consumo_mensal = dados.get("consumo_mensal", 0)
@@ -44,7 +56,7 @@ def gerar_grafico(dados):
     
     for ano in range(anos):
         acumulado_comum += consumo_mensal * 12
-        acumulado_solar = max(0, acumulado_solar - economia_mensal * 12)  
+        acumulado_solar = max(0, acumulado_solar - economia_mensal * 12)
         
         custo_comum.append(acumulado_comum)
         custo_solar.append(acumulado_solar)
@@ -63,6 +75,9 @@ def gerar_grafico(dados):
     plt.show()
 
 def calcular_custo_instalacao(dados):
+    """
+    Calcula o custo de instalação com base no consumo mensal.
+    """
     try:
         consumo_mensal = float(input("Insira o consumo médio mensal (em kWh): "))
         capacidade_necessaria_kw = round((consumo_mensal / 150) + 0.5)
@@ -81,6 +96,9 @@ def calcular_custo_instalacao(dados):
         return None
 
 def calcular_economia_mensal(dados):
+    """
+    Calcula a economia mensal com energia solar.
+    """
     try:
         media_consumo = float(input("Insira o consumo médio mensal (em kWh): "))
         tarifa = float(input("Insira a tarifa de energia de sua região (EX: R$1 por kwh) "))
@@ -95,6 +113,9 @@ def calcular_economia_mensal(dados):
         return None
 
 def calcular_tempo_retorno(dados):
+    """
+    Calcula o tempo de retorno do investimento em energia solar.
+    """
     try:
         if 'custo_instalacao' in dados and 'economia_mensal' in dados and dados['economia_mensal'] > 0:
             retorno_meses = dados['custo_instalacao'] / dados['economia_mensal']
@@ -111,6 +132,9 @@ def calcular_tempo_retorno(dados):
         return None
 
 def menu():
+    """
+    Exibe o menu e gerencia a navegação do sistema de cotação.
+    """
     dados = carregar_dados()
     while True:
         print("\n---------------------------------------------")
