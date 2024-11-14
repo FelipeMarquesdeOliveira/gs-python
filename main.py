@@ -142,7 +142,7 @@ def menu():
 
         elif escolha == "5":
             print("Abrindo link para contato no Instagram...")
-            webbrowser.open("")
+            webbrowser.open("https://www.instagram.com/greenwave2207/")
 
         elif escolha == "6":
             print("Saindo do sistema.")
