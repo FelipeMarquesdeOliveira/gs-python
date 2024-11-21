@@ -101,16 +101,21 @@ def calcular_economia_mensal(dados):
     """
     try:
         media_consumo = float(input("Insira o consumo médio mensal (em kWh): "))
-        tarifa = float(input("Insira a tarifa de energia de sua região (EX: R$1 por kwh) "))
+        tarifa_input = input("Insira a tarifa de energia de sua região (EX: 1.62 para R$1,62 por kWh): ")
+        
+        tarifa = float(tarifa_input.replace("R$", "").replace(",", "."))
+        
         economia_total = media_consumo * tarifa
 
         dados['economia_mensal'] = economia_total
         salvar_dados_automaticamente(dados)
 
+        print(f"Economia mensal estimada: R$ {economia_total:.2f}")
         return economia_total
     except ValueError:
         print("Valor inválido. Por favor, insira números válidos.")
         return None
+
 
 def calcular_tempo_retorno(dados):
     """
@@ -121,8 +126,10 @@ def calcular_tempo_retorno(dados):
             retorno_meses = dados['custo_instalacao'] / dados['economia_mensal']
             anos = int(retorno_meses // 12)
             meses = int(retorno_meses % 12)
-
-            print(f"Tempo de retorno estimado: {anos} anos e {meses} meses")
+            if meses == 1:
+                print(f"Tempo de retorno estimado: {anos} anos e {meses} mes")
+            else:
+                print(f"Tempo de retorno estimado: {anos} anos e {meses} meses")
             return retorno_meses
         else:
             print("Calcule primeiro o custo de instalação e a economia mensal.")
